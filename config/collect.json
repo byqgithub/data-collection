@@ -1,0 +1,176 @@
+{
+    "global": {
+        "interval": 60,
+        "cache_expiration":7200,
+        "check_period": 3600,
+        "center_addr": "192.168.74.244:56789",
+        "plugin_root_path": "/ipaas/collect_framework/plugins",
+        "plugin_category": ["input", "processor", "aggregator", "output"],
+        "plugin_marking": "Marking"
+    },
+    "docker": {
+        "events_update": 10,
+        "polling_period": 30
+    },
+    "database": {
+        "type": "bboltDB",
+        "path": "/ipaas/collect_framework/storage/storage.db",
+        "expiration": 604800,
+        "report_bucket": "report_save"
+    },
+    "input": [
+        {
+            "pattern": "lua",
+            "name": "cpu",
+            "version": "1",
+            "interval": 60
+        },
+        {
+            "pattern": "lua",
+            "name": "memory",
+            "version": "1",
+            "interval": 60
+        },
+        {
+            "pattern": "lua",
+            "name": "task",
+            "version": "1"
+        }
+    ],
+    "processor": [
+        {
+            "pattern": "lua",
+            "name": "diff",
+            "version": "1"
+        }
+    ],
+    "aggregator": [
+        {
+            "pattern": "lua",
+            "name": "converge",
+            "version": "1"
+        }
+    ],
+    "output": [
+        {
+            "pattern": "lua",
+            "name": "network",
+            "version": "1"
+        },
+        {
+            "pattern": "lua",
+            "name": "writeFile",
+            "version": "1"
+        }
+    ],
+    "suffix": {
+        "lua": "lua"
+    },
+    "switch": {
+        "ipv6": true
+    },
+    "recognition": {
+        "process": {
+            "dcache": "ps aux | grep \"ipes start -w /opt/soft/ipes\" | grep -v grep | wc -l",
+            "dcache_num": 1,
+            "zjtd": "ps -ef | grep -E \"bt_agent|btvdp\" | grep -v grep | wc -l",
+            "zjtd_num": 1,
+            "mgtvdb": "ps --no-headers -fC deliSvr | wc -l",
+            "mgtvdb_num": 1,
+            "yyzb": "ps -ef | grep -E \"pcdn_master|pcdn_slave|pcdn-master|pcdn-slave\" | grep -v grep | wc -l",
+            "yyzb_num": 1
+        },
+        "docker": {
+            "bonayun": "docker ps | grep bxc_public | wc -l",
+            "bonayun_num": 1,
+            "tx": "docker ps | grep -E \"edge-containers|lego-server\" | wc -l",
+            "tx_num": 1,
+            "txhj": "docker ps | grep -E \"fog_lego_server\" | wc -l",
+            "txhj_num": 1
+        },
+        "specific": ["tx", "txgp", "txhj", "bz", "bzl", "bzm", "zjtd", "mgtvdb", "yyzb",
+            "bonayun", "bendianyun", "xiaokuai", "jusha","mingfuyun", "tx80", "bdt",
+            "qncdnb", "mingfuyun_p2p", "mingfuyun_zl", "ysxl"]
+    },
+    "collect_pid": {
+        "dcache": "ps aux | grep \"ipes start -w /opt/soft/ipes\" | grep -v grep | awk '{print $2}'",
+        "dcache_pid": "pstree -p %s | sed 's/(/\\n(/g' | grep '(' | sed 's/(\\(.*\\)).*/\\1/'",
+        "ipaasDetectd": "ps aux | grep \"/ipaas/detectd/bin/detectd\" | grep -v grep | awk '{print $2}'",
+        "ipaasDetectd_pid": "pstree -p %s | sed 's/(/\\n(/g' | grep '(' | sed 's/(\\(.*\\)).*/\\1/'",
+        "ipaasTool": "ps aux | grep \"master process /ipaas/dcache/cache_prepare\" | grep -v grep | awk '{print $2}'",
+        "ipaasTool_pid": "pstree -p %s | sed 's/(/\\n(/g' | grep '(' | sed 's/(\\(.*\\)).*/\\1/'"
+    },
+    "path_conf": {
+        "log": {
+            "bdwphj": ["/storage/PoPMachineLog/", "/P2P/PoPMachineLog/"]
+        },
+        "custom_id": {
+            "dcache": ["/opt/soft/dcache/deviceid"],
+            "bdfd": ["/PCDN/id"],
+            "bdx": ["/PCDN/id"],
+            "bdwphj": ["/P2P/popnode_id"]
+        }
+    },
+    "businesses": {
+        "ks": 3,
+        "kst": 4,
+        "dcache": 14,
+        "hcdno": 19,
+        "hcdne": 20,
+        "ecdnp": 23,
+        "ecdnl": 24,
+        "ecdnd": 25,
+        "bz": 13,
+        "bzl": 33,
+        "tx": 10,
+        "txhj": 27,
+        "zjtd": 21,
+        "qn": 26,
+        "qncdn": 28,
+        "bdhk": 30,
+        "bdfd": 31,
+        "txgp": 32,
+        "jd": 6,
+        "aly": 11,
+        "yyzb": 7,
+        "wsvod": 34,
+        "ucdb": 35,
+        "yfjs": 36,
+        "mgtvdb": 29,
+        "bdwp": 37,
+        "bdwphj": 38,
+        "bonayun": 39,
+        "bendianyun": 40,
+        "xiaokuai": 41,
+        "bdx": 42,
+        "bdr": 43,
+        "faasp": 55,
+        "bsy": 66,
+        "zjzx": 44,
+        "bzm": 45,
+        "bdk": 46,
+        "bdt": 47,
+        "bdf": 48,
+        "mingfuyun": 49,
+        "zjzxdb": 50,
+        "bdip": 54,
+        "jusha": 67,
+        "bszx": 68,
+        "tx80": 80,
+        "qncdnb": 51,
+        "mingfuyun_p2p": 52,
+        "mingfuyun_zl": 53,
+        "kwai_slice": 55,
+        "ecdnksl": 56,
+        "ucr": 57,
+        "ysxl": 70,
+        "bec": 72,
+        "ipaasTool": 249,
+        "ipaasDetectd": 250,
+        "frpc": 251,
+        "pairat": 252,
+        "painull": 253,
+        "pairobot": 254,
+        "default": 255
+    }
+}

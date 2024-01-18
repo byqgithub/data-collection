@@ -1,0 +1,13 @@
+[Unit]
+Description=collect
+
+[Service]
+ExecStart=/ipaas/collect_framework/bin/collect collect --config-path=/ipaas/collect_framework/config/collect.json --log-path=/ipaas/collect_framework/logs
+Restart=always
+User=root
+Group=root
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+WorkingDirectory=/tmp
+
+[Install]
+WantedBy=multi-user.target

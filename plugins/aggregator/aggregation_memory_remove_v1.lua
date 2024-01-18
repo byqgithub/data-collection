@@ -1,0 +1,177 @@
+-- Marking: lua,aggregator,aggregation_memory_data,1
+
+local aggregator = {
+    category = "aggregator",
+    name = "aggregation_memory_v5",
+    dataVersion = "1",
+    indicator = "aggregation_memory_v5"
+}
+
+local template = {
+    category = "performance",
+    fields = {},
+    interval = 60,
+    slice_cnt = 1,
+    slice_idx = 0,
+    tags = {
+        machine_id = ""
+    },
+    timestamp = 0,
+    version = 1
+}
+
+local function printTable(value)
+    for k, v in pairs(value) do
+        print(string.format("key: %s, value: %s", k, v))
+    end
+end
+
+local function fileExists(path)
+    local file, _ = io.open(path, "rb")
+    if file then
+        file:close()
+    end
+    return file ~= nil
+end
+
+local function strip(str)
+    return string.gsub(str, "^%s*(.-)%s*$", "%1")
+end
+
+local function tableLen(t)
+    local len=0
+    for _, _ in pairs(t) do
+        len=len+1
+    end
+    return len;
+end
+
+local function readFile(filePath)
+    local content = ""
+    if fileExists(filePath) then
+        local fh, _ = io.open(filePath, "r")
+        if fh ~= nil then
+            content = fh:read('*all')
+            if (content ~= nil and string.len(content) ~= 0) then
+                content = strip(content)
+            end
+            fh:close()
+        end
+    end
+    return content
+end
+
+local function machineID()
+    local dbusPath = "/var/lib/dbus/machine-id"
+    local dbusPathEtc = "/etc/machine-id"
+    local id = readFile(dbusPath)
+    if string.len(id) == 0 then
+        id = readFile(dbusPathEtc)
+    end
+    if string.len(id) == 0 then
+        print("Can not read machine id")
+        id = ""
+    end
+    print("Machine id: ", id)
+    return id
+end
+
+local function getData(startTime, endTime, dataBox, dataFeature)
+    -- print("range: ", startTime, endTime)
+    -- print("pre type: ", type(pre))
+    local lastData = {}
+
+    local dataStr, err = dataBox:GetFields(
+            dataFeature.category,
+            dataFeature.name,
+            dataFeature.dataVersion,
+            dataFeature.indicator,
+            startTime,
+            endTime)
+    if err == nil then
+        print("Get data string: ", dataStr)
+        local dataArray = arrayUnMarshal(dataStr)
+        local length = tableLen(dataArray)
+        if length > 0 then
+            lastData = jsonUnMarshal(dataArray[length])
+        end
+    else
+        print("Failed to get fields from dataBox")
+    end
+
+    print("Get lastData: ")
+    printTable(lastData)
+    return lastData
+end
+
+local function fillTemplate()
+    template.category = "performance"
+    template.tags.machine_id = machineID()
+    template.timestamp = os.time()
+    template.fields = {}
+end
+
+local function memoryField(dataTable)
+    local field = {}
+    local nameArray = {"mem_size", "mem_usage"}
+    print("memory table:")
+    printTable(dataTable)
+    for _, name in pairs(nameArray) do
+        local tmp = dataTable[name]
+        if tmp == nil then
+            tmp = 0
+        end
+        field[name] = tmp
+    end
+    print("memory table:")
+    printTable(field)
+    return field
+end
+
+--local dataSource = {
+--    memory = {
+--        category = "processor",
+--        name = "memory",
+--        dataVersion = "1",
+--        indicator = "memory",
+--        handler = memoryField
+--    },
+--}
+
+local dataSource = {
+    memory = {
+        category = "input",
+        name = "memory",
+        dataVersion = "1",
+        indicator = "memory",
+        handler = memoryField
+    },
+    disk_system = {
+        category = "input",
+        name = "memory",
+        dataVersion = "1",
+        indicator = "memory",
+        handler = memoryField
+    }
+}
+
+function converge(startTime, endTime, dataBox)
+    local curTime = os.time()
+    local dataJson = ""
+    fillTemplate()
+    for name, item in pairs(dataSource) do
+        local dataTable = getData(startTime, endTime, dataBox, item)
+        if dataTable ~= nil then
+            local field = item.handler(dataTable)
+            if field ~= nil then
+                template.fields[name] = field
+            end
+        end
+    end
+
+    dataJson = jsonMarshal(template)
+    if dataJson ~= nil then
+        dataBox:AddField(aggregator.category, aggregator.name, aggregator.dataVersion,
+                aggregator.indicator, "", dataJson, curTime)
+    end
+end

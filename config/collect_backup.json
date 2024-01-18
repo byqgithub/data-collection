@@ -1,0 +1,87 @@
+{
+    "global": {
+        "interval": 60,
+        "cache_duration":3600,
+        "storage_duration": 604800,
+        "hot_valid": 300,
+        "center": "config center",
+        "plugin": "plugin path"
+    },
+    "input": [
+        {
+            "pattern": "lua",
+            "name": "cpu",
+            "version": "1",
+            "path": "input/cpu.lua",
+            "hash": "",
+            "source": "",
+            "interval": 60
+        },
+        {
+            "pattern": "lua",
+            "name": "memory",
+            "version": "1",
+            "path": "input/memory.lua",
+            "hash": "",
+            "source": ""
+        },
+        {
+            "pattern": "lua",
+            "name": "task",
+            "version": "1",
+            "path": "processor/diff.lua",
+            "hash": "",
+            "source": "",
+            "special_config": "->recognition"
+        }
+    ],
+    "processor": [
+        {
+            "pattern": "lua",
+            "name": "diff",
+            "version": "1",
+            "path": "processor/diff.lua",
+            "hash": "",
+            "source": "",
+            "include": ["cpu", "memory"],
+            "exclude": ["task"]
+        }
+    ],
+    "aggregator": [
+        {
+            "pattern": "lua",
+            "name": "report",
+            "version": "1",
+            "path": "aggregator/aggregator.lua",
+            "hash": "",
+            "source": "",
+            "include": ["cpu", "memory"],
+            "exclude": ["task"]
+        }
+    ],
+    "output": [
+        {
+            "pattern": "lua",
+            "name": "network",
+            "version": "1",
+            "path": "output/http_report.lua",
+            "hash": "",
+            "source": "",
+            "include": ["report"],
+            "exclude": ["task"]
+        },
+        {
+            "pattern": "lua",
+            "name": "local",
+            "version": "1",
+            "path": "output/local_server.lua",
+            "hash": "",
+            "source": "",
+            "include": ["task"],
+            "exclude": ["report"]
+        }
+    ],
+    "recognition": {
+
+    }
+}

@@ -1,0 +1,1 @@
+scp -P58779 collect root@192.168.74.244:/ipaas/collect/bin/
