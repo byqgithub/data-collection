@@ -1,2 +1,2 @@
-# -data-acquisition
+# data-acquisition
 linux data acquistion framework 
